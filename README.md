@@ -1,6 +1,6 @@
-# Morisoba Pets
+# OMP Pet sprite builder
 
-A standalone Pokémon companion workshop for **morisoba.moe**, built for [OMP Pet](https://github.com/sohamb117/omp-pet). Search 984 available species / 3,330 sprite variants, preview seven task states, choose a form and facing direction, then download a ZIP or adopt directly into the native macOS app.
+A standalone Pokémon sprite picker for **morisoba.moe**, built for [OMP Pet](https://github.com/sohamb117/omp-pet). Search 984 available species / 3,330 sprite variants, preview seven task states, choose a form and facing direction, then download a ZIP or install directly into the native macOS app.
 
 ## Run locally
 
@@ -40,7 +40,7 @@ docker run --rm -p 4173:4173 -e SITE_URL=https://morisoba.moe morisoba-pets
 
 A writable `.cache/` persists pinned source files. It can be removed safely to reclaim disk space. Preview packs use an LRU of 12 entries; no more than three packs compile concurrently. All requests fetch from one pinned upstream repository; arbitrary source URLs are never accepted. API responses are cacheable. The repository includes CI checks; there is intentionally no automatic deployment.
 
-## Direct adoption
+## Direct installation
 
 Requires **OMP Pet 0.1.2+**, Apple Silicon macOS:
 
@@ -52,7 +52,7 @@ In OMP: `/reload-plugins`, then `/pet show`. If an older companion is already ru
 
 The website opens `omppet://install?url=<encoded pack URL>&sha256=<checksum>`. macOS opens OMP Pet, which downloads in a background thread, verifies SHA-256, rejects unsupported archive entries and excessive sizes, then validates PNGs and activates the pack. Packs live under `~/Library/Application Support/OMP Pet/packs/<sha256>/`. Existing sprite preferences change only after a successful load. Nothing executes from an archive.
 
-Browsers cannot reliably detect whether the native app is installed. The site shows setup instructions and a retry link after adoption. A downloaded ZIP remains the fallback: unzip it and use `/pet sprites /path/to/folder`.
+Browsers cannot reliably detect whether the native app is installed. The site shows setup instructions and a retry link after installation. A downloaded ZIP remains the fallback: unzip it and use `/pet sprites /path/to/folder`.
 
 ## Source and pack format
 
