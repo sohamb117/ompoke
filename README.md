@@ -1,6 +1,6 @@
-# OMP Pet sprite builder
+# OMPoke
 
-A standalone Pokémon sprite picker for **morisoba.moe**, built for [OMP Pet](https://github.com/sohamb117/omp-pet). Search 984 available species / 3,330 sprite variants, preview seven task states, choose a form and facing direction, then download a ZIP or install directly into the native macOS app.
+A standalone Pokémon sprite picker for **ompoke.morisoba.moe**, built for [OMP Pet](https://github.com/sohamb117/omp-pet). Search 984 available species / 3,330 sprite variants, preview seven task states, choose a form and facing direction, then download a ZIP or install directly into the native macOS app.
 
 ## Run locally
 
@@ -21,7 +21,7 @@ bun run start
 
 ## Automatic deployment to Google Cloud
 
-GitHub Actions is configured to test and deploy `main` to Cloud Run. See [deploy/README.md](deploy/README.md) for project setup, keyless authentication, resource limits, repository variables, and Cloudflare DNS. The existing server-based sprite generation is retained; no browser-only or native-app rewrite is needed. Deployment remains gated until a Google Cloud project and public hostname are configured.
+GitHub Actions is configured to test and deploy `main` to Cloud Run. See [deploy/README.md](deploy/README.md) for project setup, keyless authentication, resource limits, repository variables, and Cloudflare DNS. The existing server-based sprite generation is retained; no browser-only or native-app rewrite is needed. Production uses project `personal-use-493017`, region `us-east1`, and hostname `ompoke.morisoba.moe`.
 
 ## Run on another container host
 
@@ -30,7 +30,7 @@ This is a Bun + Express server with a Vite/React frontend. It needs a server/con
 ```sh
 bun install --frozen-lockfile
 bun run build
-NODE_ENV=production HOST=0.0.0.0 PORT=4173 SITE_URL=https://morisoba.moe bun server/index.ts
+NODE_ENV=production HOST=0.0.0.0 PORT=4173 SITE_URL=https://ompoke.morisoba.moe bun server/index.ts
 ```
 
 Terminate HTTPS at your host/reverse proxy. Forward requests to port 4173. `SITE_URL` must match the public origin; it is deliberately not inferred from client headers. Use the origin root (not a path prefix). `https://pets.morisoba.moe` and `https://www.morisoba.moe` are also accepted by the native app. Loopback HTTP on an explicit port works for local development. Other domains require updating the app's allowlist.
@@ -39,17 +39,17 @@ Or build the included container:
 
 ```sh
 docker build -t morisoba-pets .
-docker run --rm -p 4173:4173 -e SITE_URL=https://morisoba.moe morisoba-pets
+docker run --rm -p 4173:4173 -e SITE_URL=https://ompoke.morisoba.moe morisoba-pets
 ```
 
 A writable `.cache/` persists pinned source files. It can be removed safely to reclaim disk space. Preview packs use an LRU of 12 entries capped at 32 MiB; no more than three packs compile concurrently. The source cache is capped at 64 MiB. All requests fetch from one pinned upstream repository; arbitrary source URLs are never accepted. API responses are cacheable. The repository includes CI checks and the Cloud Run deployment workflow.
 
 ## Direct installation
 
-Requires **OMP Pet 0.1.2+**, Apple Silicon macOS:
+Requires **OMP Pet 0.1.3+**, Apple Silicon macOS:
 
 ```sh
-omp plugin install 'github:sohamb117/omp-pet#v0.1.2'
+omp plugin install 'github:sohamb117/omp-pet#v0.1.3'
 ```
 
 In OMP: `/reload-plugins`, then `/pet show`. If an older companion is already running, `/pet quit` before `/pet show` to load the new app.

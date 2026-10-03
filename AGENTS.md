@@ -1,4 +1,4 @@
-# Morisoba Pets
+# OMPoke
 
 A standalone site that builds OMP Pet-compatible Pokémon sprite packs from a pinned SpriteCollab revision. Keep the native app in ../omp-pet separate.
 

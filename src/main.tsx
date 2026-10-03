@@ -563,7 +563,7 @@ function InstallDialog({
           <b>Get OMP Pet.</b>
           <p>
             In OMP, run{" "}
-            <code>omp plugin install 'github:sohamb117/omp-pet#v0.1.2'</code>,
+            <code>omp plugin install 'github:sohamb117/omp-pet#v0.1.3'</code>,
             then <code>/reload-plugins</code>. This also selects the version
             needed for direct installation.
           </p>
@@ -573,7 +573,7 @@ function InstallDialog({
           <p>
             If an older pet is running, use <code>/pet quit</code> first. Run{" "}
             <code>/pet show</code>. This installs and opens the native macOS
-            app. Direct installation needs version 0.1.2 or later.
+            app. Direct installation needs version 0.1.3 or later.
           </p>
         </li>
         <li>
