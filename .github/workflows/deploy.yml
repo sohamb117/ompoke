@@ -72,7 +72,7 @@ jobs:
           gcloud run deploy ompoke --project="$PROJECT" --region="$REGION" \
             --image="$IMAGE" --service-account="$RUNTIME_ACCOUNT" \
             --port=4173 --cpu=1 --memory=1Gi --concurrency=8 \
-            --min-instances=0 --max-instances=2 --timeout=120 \
+            --min=0 --max=2 --min-instances=0 --max-instances=2 --timeout=120 \
             --set-env-vars="NODE_ENV=production,HOST=0.0.0.0,SITE_URL=$SITE_URL" --quiet
           URL=$(gcloud run services describe ompoke --project="$PROJECT" --region="$REGION" --format='value(status.url)')
           curl --retry 6 --retry-all-errors --retry-delay 2 --max-time 20 --fail "$URL/api/health"
