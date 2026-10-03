@@ -51,8 +51,8 @@ jobs:
           echo "IMAGE=$IMAGE" >> "$GITHUB_ENV"
           docker build -t "$IMAGE" .
           docker run --rm -d --name smoke -p 127.0.0.1:4180:4173 -e SITE_URL="$SITE_URL" "$IMAGE"
-          trap 'docker stop smoke' EXIT
-          curl --retry 12 --retry-connrefused --retry-delay 1 --fail http://127.0.0.1:4180/healthz
+          trap 'docker logs smoke; docker stop smoke' EXIT
+          curl --retry 12 --retry-all-errors --retry-delay 1 --max-time 5 --fail http://127.0.0.1:4180/healthz
           curl --fail --max-time 90 'http://127.0.0.1:4180/api/preview/0570?direction=1' -o /tmp/preview.json
           curl --fail --max-time 90 'http://127.0.0.1:4180/api/packs/0570?direction=1' -o /tmp/pack.zip
           python3 - <<'PY'
