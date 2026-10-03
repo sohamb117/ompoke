@@ -213,6 +213,7 @@ function App() {
     const controller = new AbortController();
     fetch(`/api/preview/${selected}?direction=${direction}`, {
       signal: controller.signal,
+      cache: "no-store",
     })
       .then(async (r) => {
         const d = await r.json();

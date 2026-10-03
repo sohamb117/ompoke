@@ -30,7 +30,7 @@ app.get("/api/preview/:id", async (req, res) => {
   const pack = await getPack(id, direction);
   const url = new URL(`/api/packs/${id}?direction=${direction}`, publicURL);
   const installURL = `omppet://install?url=${encodeURIComponent(url.href)}&sha256=${pack.sha256}`;
-  res.set("Cache-Control", "public, max-age=3600").json({
+  res.set("Cache-Control", "no-store").json({
     manifest: pack.manifest,
     mapping: pack.mapping,
     notes: pack.notes,
@@ -56,6 +56,10 @@ app.get("/api/sheets/:id/:file", async (req, res) => {
   const { id, direction } = selection(req);
   const file = String(req.params.file);
   const pack = await getPack(id, direction);
+  if (req.query.v && req.query.v !== pack.sha256) {
+    res.status(409).json({error: "This preview has changed. Refresh to get the latest pack."});
+    return;
+  }
   if (!/^[\w-]+\.png$/.test(file) || !pack.files[file]) {
     res.status(404).end();
     return;
