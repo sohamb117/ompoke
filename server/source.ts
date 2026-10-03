@@ -2,6 +2,8 @@ import { mkdir, readFile, writeFile, rename } from "node:fs/promises";
 import { resolve } from "node:path";
 import { createHash, randomUUID } from "node:crypto";
 import { upstream } from "./catalog";
+import { pruneSourceCache } from "./cache";
+let maintenance = Promise.resolve();
 const cache = resolve(".cache/source");
 const pending = new Map<string, Promise<Buffer>>();
 export async function source(
@@ -43,6 +45,10 @@ export async function source(
     const temp = `${dest}.${randomUUID()}`;
     await writeFile(temp, bytes);
     await rename(temp, dest);
+    maintenance = maintenance
+      .catch(() => {})
+      .then(() => pruneSourceCache(cache, 64 * 1024 * 1024));
+    await maintenance;
     return bytes;
   })();
   pending.set(key, work);

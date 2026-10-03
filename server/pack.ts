@@ -1,4 +1,6 @@
 import sharp from "sharp";
+sharp.concurrency(1);
+sharp.cache({ memory: 16, files: 0, items: 32 });
 import { XMLParser } from "fast-xml-parser";
 import { zipSync, strToU8 } from "fflate";
 import { readFile } from "node:fs/promises";
@@ -270,6 +272,10 @@ export async function compilePack(
 // Bounded, single-flight build cache. Limit CPU work and memory regardless of catalog size.
 const ready = new Map<string, Pack>();
 const pending = new Map<string, Promise<Pack>>();
+let readyBytes = 0;
+const packBytes = (pack: Pack) =>
+  pack.zip.byteLength +
+  Object.values(pack.files).reduce((n, file) => n + file.byteLength, 0);
 export function getPack(id: string, direction: number): Promise<Pack> {
   findEntry(id);
   const key = `${id}:${direction}`;
@@ -288,7 +294,12 @@ export function getPack(id: string, direction: number): Promise<Pack> {
   const work = compilePack(id, direction)
     .then((pack) => {
       ready.set(key, pack);
-      while (ready.size > 12) ready.delete(ready.keys().next().value!);
+      readyBytes += packBytes(pack);
+      while (ready.size > 12 || readyBytes > 32 * 1024 * 1024) {
+        const oldest = ready.keys().next().value!;
+        readyBytes -= packBytes(ready.get(oldest)!);
+        ready.delete(oldest);
+      }
       return pack;
     })
     .finally(() => pending.delete(key));

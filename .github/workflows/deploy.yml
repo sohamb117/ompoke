@@ -1,0 +1,79 @@
+name: Deploy to Cloud Run
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: cloud-run-production
+  cancel-in-progress: false
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6
+        with:
+          bun-version: 1.3.14
+      - run: bun install --frozen-lockfile
+      - run: bun test tests
+      - run: bun run build
+  deploy:
+    needs: check
+    if: vars.GCP_PROJECT_ID != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: production
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      PROJECT: ${{ vars.GCP_PROJECT_ID }}
+      REGION: ${{ vars.GCP_REGION }}
+      SITE_URL: ${{ vars.SITE_URL }}
+      RUNTIME_ACCOUNT: ${{ vars.GCP_RUNTIME_ACCOUNT }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Validate deployment configuration
+        run: |
+          test -n "$PROJECT" && test -n "$REGION" && test -n "$RUNTIME_ACCOUNT"
+          case "$SITE_URL" in https://*) ;; *) echo 'SITE_URL must be an HTTPS origin'; exit 1;; esac
+      - uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3
+        with:
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_DEPLOY_ACCOUNT }}
+      - uses: google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db # v3
+      - name: Build and test production container
+        run: |
+          IMAGE="$REGION-docker.pkg.dev/$PROJECT/ompoke/site:$GITHUB_SHA"
+          echo "IMAGE=$IMAGE" >> "$GITHUB_ENV"
+          docker build -t "$IMAGE" .
+          docker run --rm -d --name smoke -p 127.0.0.1:4180:4173 -e SITE_URL="$SITE_URL" "$IMAGE"
+          trap 'docker stop smoke' EXIT
+          curl --retry 12 --retry-connrefused --retry-delay 1 --fail http://127.0.0.1:4180/healthz
+          curl --fail --max-time 90 'http://127.0.0.1:4180/api/preview/0570?direction=1' -o /tmp/preview.json
+          curl --fail --max-time 90 'http://127.0.0.1:4180/api/packs/0570?direction=1' -o /tmp/pack.zip
+          python3 - <<'PY'
+          import hashlib, json, os, zipfile
+          from urllib.parse import parse_qs, urlparse
+          p = json.load(open('/tmp/preview.json'))
+          assert hashlib.sha256(open('/tmp/pack.zip','rb').read()).hexdigest() == p['sha256']
+          assert parse_qs(urlparse(p['installURL']).query)['url'][0].startswith(os.environ['SITE_URL'] + '/api/packs/')
+          with zipfile.ZipFile('/tmp/pack.zip') as z:
+              assert 'manifest.json' in z.namelist()
+              assert json.loads(z.read('manifest.json'))['sleep']
+          PY
+      - name: Push image and deploy
+        run: |
+          gcloud auth configure-docker "$REGION-docker.pkg.dev" --quiet
+          docker push "$IMAGE"
+          gcloud run deploy ompoke --project="$PROJECT" --region="$REGION" \
+            --image="$IMAGE" --service-account="$RUNTIME_ACCOUNT" \
+            --port=4173 --cpu=1 --memory=1Gi --concurrency=8 \
+            --min-instances=0 --max-instances=2 --timeout=120 \
+            --set-env-vars="NODE_ENV=production,HOST=0.0.0.0,SITE_URL=$SITE_URL" --quiet
+          URL=$(gcloud run services describe ompoke --project="$PROJECT" --region="$REGION" --format='value(status.url)')
+          echo "Cloud Run: $URL" >> "$GITHUB_STEP_SUMMARY"
+          echo "Custom hostname: $SITE_URL" >> "$GITHUB_STEP_SUMMARY"

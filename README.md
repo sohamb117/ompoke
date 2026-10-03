@@ -19,7 +19,11 @@ bun run build
 bun run start
 ```
 
-## Deploy on your own host
+## Automatic deployment to Google Cloud
+
+GitHub Actions is configured to test and deploy `main` to Cloud Run. See [deploy/README.md](deploy/README.md) for project setup, keyless authentication, resource limits, repository variables, and Cloudflare DNS. The existing server-based sprite generation is retained; no browser-only or native-app rewrite is needed. Deployment remains gated until a Google Cloud project and public hostname are configured.
+
+## Run on another container host
 
 This is a Bun + Express server with a Vite/React frontend. It needs a server/container, not static-only hosting, because it generates ZIP files and offers stable download endpoints for native installation.
 
@@ -38,7 +42,7 @@ docker build -t morisoba-pets .
 docker run --rm -p 4173:4173 -e SITE_URL=https://morisoba.moe morisoba-pets
 ```
 
-A writable `.cache/` persists pinned source files. It can be removed safely to reclaim disk space. Preview packs use an LRU of 12 entries; no more than three packs compile concurrently. All requests fetch from one pinned upstream repository; arbitrary source URLs are never accepted. API responses are cacheable. The repository includes CI checks; there is intentionally no automatic deployment.
+A writable `.cache/` persists pinned source files. It can be removed safely to reclaim disk space. Preview packs use an LRU of 12 entries capped at 32 MiB; no more than three packs compile concurrently. The source cache is capped at 64 MiB. All requests fetch from one pinned upstream repository; arbitrary source URLs are never accepted. API responses are cacheable. The repository includes CI checks and the Cloud Run deployment workflow.
 
 ## Direct installation
 

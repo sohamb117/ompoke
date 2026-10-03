@@ -7,6 +7,9 @@ const app = express();
 const port = Number(process.env.PORT || 4173);
 const publicURL = new URL(process.env.SITE_URL || `http://localhost:${port}`);
 app.disable("x-powered-by");
+app.get("/healthz", (_req, res) =>
+  res.set("Cache-Control", "no-store").json({ ok: true }),
+);
 app.use((_req, res, next) => {
   res.set({
     "X-Content-Type-Options": "nosniff",
@@ -57,11 +60,9 @@ app.get("/api/sheets/:id/:file", async (req, res) => {
   const file = String(req.params.file);
   const pack = await getPack(id, direction);
   if (req.query.v && req.query.v !== pack.sha256) {
-    res
-      .status(409)
-      .json({
-        error: "This preview has changed. Refresh to get the latest pack.",
-      });
+    res.status(409).json({
+      error: "This preview has changed. Refresh to get the latest pack.",
+    });
     return;
   }
   if (!/^[\w-]+\.png$/.test(file) || !pack.files[file]) {
