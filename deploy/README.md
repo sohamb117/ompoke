@@ -42,7 +42,7 @@ OMP Pet **0.1.3+** accepts `ompoke.morisoba.moe` install links. Older versions m
 
 ## Verification and rollback
 
-After deploying, check `/healthz`, `/api/preview/0570?direction=1`, and `/api/packs/0570?direction=1` at the public origin. Verify ZIP SHA-256 against the preview's checksum and native pack validation. Direct adoption also requires working DNS/TLS on the hostname in `SITE_URL`.
+After deploying, check `/api/health`, `/api/preview/0570?direction=1`, and `/api/packs/0570?direction=1` at the public origin. Verify ZIP SHA-256 against the preview's checksum and native pack validation. Direct adoption also requires working DNS/TLS on the hostname in `SITE_URL`.
 
 Each image is tagged with its Git commit. Cloud Run retains revisions; roll back by sending traffic to a previously healthy revision. Images can be cleaned up with an Artifact Registry retention policy once a retention window is chosen.
 

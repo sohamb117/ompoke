@@ -52,7 +52,7 @@ jobs:
           docker build -t "$IMAGE" .
           docker run --rm -d --name smoke -p 127.0.0.1:4180:4173 -e SITE_URL="$SITE_URL" "$IMAGE"
           trap 'docker logs smoke; docker stop smoke' EXIT
-          curl --retry 12 --retry-all-errors --retry-delay 1 --max-time 5 --fail http://127.0.0.1:4180/healthz
+          curl --retry 12 --retry-all-errors --retry-delay 1 --max-time 5 --fail http://127.0.0.1:4180/api/health
           curl --fail --max-time 90 'http://127.0.0.1:4180/api/preview/0570?direction=1' -o /tmp/preview.json
           curl --fail --max-time 90 'http://127.0.0.1:4180/api/packs/0570?direction=1' -o /tmp/pack.zip
           python3 - <<'PY'
@@ -75,5 +75,6 @@ jobs:
             --min-instances=0 --max-instances=2 --timeout=120 \
             --set-env-vars="NODE_ENV=production,HOST=0.0.0.0,SITE_URL=$SITE_URL" --quiet
           URL=$(gcloud run services describe ompoke --project="$PROJECT" --region="$REGION" --format='value(status.url)')
+          curl --retry 6 --retry-all-errors --retry-delay 2 --max-time 20 --fail "$URL/api/health"
           echo "Cloud Run: $URL" >> "$GITHUB_STEP_SUMMARY"
           echo "Custom hostname: $SITE_URL" >> "$GITHUB_STEP_SUMMARY"

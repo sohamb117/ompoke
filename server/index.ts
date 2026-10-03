@@ -7,7 +7,7 @@ const app = express();
 const port = Number(process.env.PORT || 4173);
 const publicURL = new URL(process.env.SITE_URL || `http://localhost:${port}`);
 app.disable("x-powered-by");
-app.get("/healthz", (_req, res) =>
+app.get("/api/health", (_req, res) =>
   res.set("Cache-Control", "no-store").json({ ok: true }),
 );
 app.use((_req, res, next) => {
