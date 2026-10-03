@@ -15,16 +15,16 @@ Cloud Run's writable filesystem uses instance memory. The source cache is pruned
 
 ## GitHub repository variables
 
-Set these on `sohamb117/ompoke` after choosing the GCP project and public hostname:
+Configured on `sohamb117/ompoke`:
 
 | Variable                         | Value                                                                                           |
 | -------------------------------- | ----------------------------------------------------------------------------------------------- |
-| `GCP_PROJECT_ID`                 | Selected project ID                                                                             |
-| `GCP_REGION`                     | Cloud Run and Artifact Registry region                                                          |
-| `GCP_RUNTIME_ACCOUNT`            | `ompoke-runtime@PROJECT_ID.iam.gserviceaccount.com`                                             |
-| `GCP_DEPLOY_ACCOUNT`             | `ompoke-deploy@PROJECT_ID.iam.gserviceaccount.com`                                              |
-| `GCP_WORKLOAD_IDENTITY_PROVIDER` | `projects/PROJECT_NUMBER/locations/global/workloadIdentityPools/ompoke-github/providers/github` |
-| `SITE_URL`                       | Public HTTPS origin, such as `https://pets.morisoba.moe`                                        |
+| `GCP_PROJECT_ID`                 | `personal-use-493017`                                                                             |
+| `GCP_REGION`                     | `us-east1`                                                          |
+| `GCP_RUNTIME_ACCOUNT`            | `ompoke-runtime@personal-use-493017.iam.gserviceaccount.com`                                             |
+| `GCP_DEPLOY_ACCOUNT`             | `ompoke-deploy@personal-use-493017.iam.gserviceaccount.com`                                              |
+| `GCP_WORKLOAD_IDENTITY_PROVIDER` | `projects/702656615053/locations/global/workloadIdentityPools/ompoke-github/providers/github` |
+| `SITE_URL`                       | `https://ompoke.morisoba.moe`                                        |
 
 The `production` GitHub environment is used for deployment. PRs only run tests and build checks. No service-account JSON key or long-lived GCP secret is needed. Generated federation credential files are excluded from Git and Docker's build context.
 
@@ -36,7 +36,9 @@ Use the actual records returned by the chosen GCP custom-domain setup. Do **not*
 
 For an eligible region, Cloud Run domain mapping supports managed certificates and returns the required DNS records, after verifying ownership of the parent domain. This mapping feature is currently Preview, and Google does not recommend it for production services. Alternatives are Firebase Hosting forwarding to Cloud Run or an external Application Load Balancer. Choose the mapping before changing DNS; leave existing personal-site records intact.
 
-When Google is validating a domain/certificate through DNS, use DNS-only records initially and verify HTTPS before changing proxy settings. The existing OMP Pet 0.1.2 importer accepts `morisoba.moe`, `www.morisoba.moe`, and `pets.morisoba.moe`. A different hostname needs an app allowlist update. Set `SITE_URL` to the final approved hostname; do not leave it as localhost or an unapproved `run.app` host.
+The `ompoke.morisoba.moe` domain mapping targets the `ompoke` service in `us-east1`. Cloudflare has a DNS-only CNAME from `ompoke` to `ghs.googlehosted.com`, as returned by Google. Google manages the TLS certificate. Existing personal-site records are unchanged.
+
+OMP Pet **0.1.3+** accepts `ompoke.morisoba.moe` install links. Older versions must be upgraded for direct installation; ZIP downloads remain usable. `SITE_URL` must remain the approved custom HTTPS origin, not localhost or a `run.app` hostname.
 
 ## Verification and rollback
 
