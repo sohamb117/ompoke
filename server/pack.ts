@@ -80,7 +80,7 @@ export async function compilePack(id:string,direction:number):Promise<Pack> {
   files['manifest.json']=strToU8(JSON.stringify(manifest,null,2));
   files['CREDITS.md']=strToU8(credits); files['upstream-credits.txt']=strToU8(rawCredits);
   files['ARTWORK-LICENSE.md']=await readFile(new URL('../data/ARTWORK-LICENSE.md',import.meta.url));
-  files['artist-names.txt']=strToU8(entry.artists.map(a=>`${a.name}\t${'contact' in a?a.contact:''}`).join('\n'));
+  files['artist-names.txt']=await readFile(new URL('../data/credit_names.txt',import.meta.url));
   const zip=Buffer.from(zipSync(files,{level:6,mtime:new Date('2020-01-01T00:00:00Z')}));
   return {manifest,mapping,notes,files,zip,sha256:createHash('sha256').update(zip).digest('hex'),filename:`${entry.species.toLowerCase().replace(/[^a-z0-9]+/g,'-')}-${id}-d${direction}.omp-pet.zip`,credits};
 }
