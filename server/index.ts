@@ -57,7 +57,11 @@ app.get("/api/sheets/:id/:file", async (req, res) => {
   const file = String(req.params.file);
   const pack = await getPack(id, direction);
   if (req.query.v && req.query.v !== pack.sha256) {
-    res.status(409).json({error: "This preview has changed. Refresh to get the latest pack."});
+    res
+      .status(409)
+      .json({
+        error: "This preview has changed. Refresh to get the latest pack.",
+      });
     return;
   }
   if (!/^[\w-]+\.png$/.test(file) || !pack.files[file]) {
@@ -102,7 +106,15 @@ if (process.env.NODE_ENV === "production") {
 } else {
   const { createServer } = await import("vite");
   const vite = await createServer({
-    server: { middlewareMode: true },
+    server: {
+      middlewareMode: true,
+      // Bun's native filesystem watcher can leave Vite's transform cache stale on macOS.
+      watch: {
+        usePolling: true,
+        interval: 300,
+        ignored: ["**/.cache/**", "**/work/**"],
+      },
+    },
     appType: "spa",
   });
   app.use(vite.middlewares);

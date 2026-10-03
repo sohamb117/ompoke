@@ -189,8 +189,7 @@ function App() {
   const [preview, setPreview] = useState<Preview | null>(null),
     [error, setError] = useState(""),
     [retry, setRetry] = useState(0),
-    [install, setInstall] = useState(false),
-    [help, setHelp] = useState(false);
+    [install, setInstall] = useState(false);
   const [visibleCount, setVisibleCount] = useState(48);
   useEffect(() => {
     const controller = new AbortController();
@@ -230,7 +229,6 @@ function App() {
   useEffect(() => {
     function close(e: KeyboardEvent) {
       if (e.key === "Escape") {
-        setHelp(false);
         setInstall(false);
       }
     }
@@ -261,63 +259,23 @@ function App() {
   return (
     <>
       <header className="topbar">
-        <a href="/" className="wordmark">
-          <span className="brand-icon">
-            m<span>✦</span>
-          </span>
-          morisoba<span className="wordmark-sub">pets</span>
+        <a
+          className="app-link"
+          href="https://github.com/sohamb117/omp-pet"
+          target="_blank"
+          rel="noreferrer"
+        >
+          <svg className="app-pixel" viewBox="0 0 16 16" aria-hidden="true">
+            <path fill="currentColor" d="M2 2h3v2h6V2h3v10h-2v2H4v-2H2z" />
+            <path fill="#030303" d="M5 7h2v2H5zm4 0h2v2H9zM7 11h2v1H7z" />
+          </svg>
+          <h1>OMP Pet</h1>
+          <span aria-hidden="true">↗</span>
         </a>
-        <nav>
-          <span className="small-note">small companions, good company.</span>
-          <button className="text-button" onClick={() => setHelp(true)}>
-            How it works <span>↗</span>
-          </button>
-          <a
-            className="github"
-            href="https://github.com/sohamb117/omp-pet"
-            target="_blank"
-            rel="noreferrer"
-          >
-            OMP Pet ↗
-          </a>
-        </nav>
       </header>
       <main>
-        <section className="intro">
-          <div>
-            <div className="eyebrow">
-              <span className="status-dot" /> THE DESKTOP COMPANION WORKSHOP
-            </div>
-            <h1>
-              A little company.
-              <br />
-              <em>A lot of character.</em>
-            </h1>
-            <p>
-              Pick a Pokémon. Make yourself a desktop friend.
-              <br className="desktop-break" /> It works, waits, and winds down
-              with you.
-            </p>
-          </div>
-          <div className="intro-note">
-            <span className="hand-star">✳</span>
-            <span>
-              for the long builds
-              <br />
-              and little victories.
-            </span>
-          </div>
-        </section>
         <section className="workshop" aria-label="Pet builder">
           <aside className="catalog">
-            <div className="section-heading">
-              <h2>
-                <span>01</span> Find your companion
-              </h2>
-              <span className="count">
-                {uniqueSpecies.length || "…"} Pokémon
-              </span>
-            </div>
             <label className="search">
               <Icon kind="search" />
               <input
@@ -337,13 +295,13 @@ function App() {
                 aria-pressed={filter === "favorites"}
                 onClick={() => setFilter("favorites")}
               >
-                A few favorites
+                Favorites
               </button>
               <button
                 aria-pressed={filter === "all"}
                 onClick={() => setFilter("all")}
               >
-                The whole Pokédex
+                All Pokémon
               </button>
             </div>
             <div className="pokemon-grid" aria-label="Pokémon choices">
@@ -377,7 +335,7 @@ function App() {
               )}
               {entries.length > 0 && !results.length && (
                 <p className="empty">
-                  No companions found.
+                  No Pokémon found.
                   <br />
                   Try another name or number.
                 </p>
@@ -388,33 +346,18 @@ function App() {
                 className="load-more"
                 onClick={() => setVisibleCount((n) => n + 48)}
               >
-                Show more companions ↓
+                Show more ↓
               </button>
             )}
-            <div className="catalog-footer">
-              <span>✦</span> Every good workday deserves a sidekick.
-            </div>
           </aside>
           <div className="builder">
-            <div className="section-heading">
-              <h2>
-                <span>02</span> Make it yours
-              </h2>
-              <span className="preview-tag">LIVE PREVIEW</span>
-            </div>
             <div className="pet-title">
               <div>
-                <span className="eyebrow muted">YOUR NEXT DESKMATE</span>
                 <h2>
                   {entry?.species || "Zorua"}
                   <span>#{String(entry?.number || 570).padStart(3, "0")}</span>
                 </h2>
               </div>
-              <span className="pet-seal">
-                made for
-                <br />
-                <b>OMP PET</b>
-              </span>
             </div>
             <div className="stage">
               <div className="stage-top">
@@ -451,21 +394,9 @@ function App() {
                   </>
                 ) : (
                   <div className="loading" role="status">
-                    <span>✦</span>Getting your companion ready…
+                    <span>✦</span>Loading sprites…
                   </div>
                 )}
-              </div>
-              <div className="stage-bottom">
-                <span>
-                  {state === "sleep"
-                    ? "Even little companions need a break."
-                    : state === "working"
-                      ? "Keeping you company while things happen."
-                      : state === "celebrate"
-                        ? "A little victory dance. You earned it."
-                        : "Looks like you two will get along."}
-                </span>
-                <span className="stage-corner">⌟</span>
               </div>
             </div>
             <div className="state-tabs" aria-label="Animation state">
@@ -508,14 +439,6 @@ function App() {
                 </select>
               </label>
             </div>
-            <div className="pack-summary">
-              <span>
-                <Icon kind="spark" /> Seven moments. One little friend.
-              </span>
-              <span>
-                {preview ? `${Math.round(preview.bytes / 1024)} KB` : "…"}
-              </span>
-            </div>
             <div className="actions">
               <button
                 className="primary"
@@ -525,7 +448,7 @@ function App() {
                   window.location.href = preview!.installURL;
                 }}
               >
-                Adopt in OMP Pet <Icon kind="arrow" />
+                Install in OMP Pet <Icon kind="arrow" />
               </button>
               <a
                 className={`download ${!preview ? "disabled" : ""}`}
@@ -541,13 +464,9 @@ function App() {
                 <Icon kind="download" /> Download pack
               </a>
             </div>
-            <p className="install-note">
-              For macOS · OMP Pet 0.1.2+{" "}
-              <button onClick={() => setHelp(true)}>New here?</button>
-            </p>
             <details className="credits">
               <summary>
-                Made by humans. Meet the sprite artists. <span>+</span>
+                Art from SpriteCollab <span>+</span>
               </summary>
               <p>
                 {entry?.artists.map((a, i) => (
@@ -583,38 +502,11 @@ function App() {
             </details>
           </div>
         </section>
-        <section className="bottom-note">
-          <span className="tiny-flower">✳</span>
-          <p>
-            Not another thing to look after.
-            <br />
-            <b>Just something nice to have around.</b>
-          </p>
-          <span>A MORISOBA SIDE QUEST · 2026</span>
-        </section>
       </main>
-      <footer>
-        <span>
-          morisoba <span className="muted">/ a little company</span>
-        </span>
-        <p>
-          An unofficial, noncommercial fan project. Pokémon belongs to its
-          respective owners.
-          <br />
-          Sprites from{" "}
-          <a href="https://github.com/PMDCollab/SpriteCollab">SpriteCollab</a>,
-          with attribution and{" "}
-          <a href="https://github.com/PMDCollab/SpriteCollab/blob/master/LICENSE.md">
-            artwork terms
-          </a>{" "}
-          in every pack.
-        </p>
-      </footer>
-      {(help || install) && (
+      {install && (
         <div
           className="modal-backdrop"
           onClick={() => {
-            setHelp(false);
             setInstall(false);
           }}
         >
@@ -622,7 +514,6 @@ function App() {
             install={install}
             url={preview?.installURL}
             close={() => {
-              setHelp(false);
               setInstall(false);
             }}
           />
@@ -660,14 +551,11 @@ function InstallDialog({
       >
         <Icon kind="close" />
       </button>
-      <span className="eyebrow">A FRIEND IN A FEW CLICKS</span>
-      <h2>
-        {install ? "Meet you on the desktop." : "From Pokédex to desktop."}
-      </h2>
+      <h2>Open OMP Pet</h2>
       {install && (
         <p>
           Your browser should ask to open OMP Pet. Allow it to download and
-          activate your selected companion.
+          activate the selected sprite pack.
         </p>
       )}
       <ol>
@@ -677,7 +565,7 @@ function InstallDialog({
             In OMP, run{" "}
             <code>omp plugin install 'github:sohamb117/omp-pet#v0.1.2'</code>,
             then <code>/reload-plugins</code>. This also selects the version
-            needed for direct adoption.
+            needed for direct installation.
           </p>
         </li>
         <li>
@@ -685,14 +573,14 @@ function InstallDialog({
           <p>
             If an older pet is running, use <code>/pet quit</code> first. Run{" "}
             <code>/pet show</code>. This installs and opens the native macOS
-            app. Direct adoption needs version 0.1.2 or later.
+            app. Direct installation needs version 0.1.2 or later.
           </p>
         </li>
         <li>
-          <b>Bring your companion home.</b>
+          <b>Install the sprite pack.</b>
           <p>
-            Choose “Adopt in OMP Pet” and allow the browser to open the app. Or
-            download the ZIP, unzip it, and run{" "}
+            Choose “Install in OMP Pet” and allow the browser to open the app.
+            Or download the ZIP, unzip it, and run{" "}
             <code>/pet sprites /path/to/unzipped-folder</code>.
           </p>
         </li>
@@ -702,9 +590,6 @@ function InstallDialog({
           Open OMP Pet again <Icon kind="arrow" />
         </a>
       )}
-      <p className="modal-footnote">
-        No account. No subscription. Just a little company.
-      </p>
     </dialog>
   );
 }
